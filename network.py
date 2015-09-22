@@ -40,6 +40,12 @@ class Network:
 
     def out(self):
         None
-        
+
     def train(self):
         None
+'''
+To do:
+- input -> output
+- training
+- genetic algorithm 
+'''
