@@ -44,24 +44,30 @@ class Layer:
 
 class Input(Layer):
     def __init__(self, length):
-        super().__init__(self, length)
-        self._inputs = np.array([])
+        super().__init__(length)
 
     def out(self, aInput):
-        self._inputs = aInput
-        return self._inputs
+        return aInput
 
 
 class Network:
     def __init__(self, inp, hid, out):
         self._input = Input(inp)
         self._output = Layer(out)
-        self._hidden = []
+        self._layers = []
+        self._layers.append(self._input)
         for i in hid:
-            self._hidden.append(Layer(i))
+            self._layers.append(Layer(i))
+        self._layers.append(self._output)
 
-    def out(self):
-        pass
+        for i in range(1, self._layers.size):
+            self._layers[i].connect(self._layers[i-1])
+
+    def out(self, aInput):
+        arr = aInput
+        for layer in self._layers:
+            arr = layer.out(arr)
+        return arr
 
     def train(self):
         pass
