@@ -12,9 +12,9 @@ class Neuron:
         '''weights should be a (L+1) vector'''
         self._weights = aWeights
 
-    def out(self, input):
+    def out(self, aInput):
         '''input should be a (L+1) vector, should have a -1 as last value for threshold weight'''
-        return sigmoid(np.dot(input, self._weights))
+        return sigmoid(np.dot(aInput, self._weights))
 
 
 class Layer:
@@ -33,9 +33,9 @@ class Layer:
         layer._nextLayer = self
         self._prevLayer = layer
 
-    def out(self, input):
+    def out(self, aInput):
         '''input should be a (L) vector'''
-        inp = input.append(-1)
+        inp = aInput.append(-1)
         arr = np.array([])
         for(neuron in self._neurons):
             arr.append(neuron.out(inp))
@@ -44,26 +44,29 @@ class Layer:
 
 class Input(Layer):
     def __init__(self, length):
+        super().__init__(self, length)
         self._inputs = np.array([])
-#need to finish input
+
+    def out(self, aInput):
+        self._inputs = aInput
+        return self._inputs
 
 
 class Network:
     def __init__(self, inp, hid, out):
-        self._input = Layer(inp)
+        self._input = Input(inp)
         self._output = Layer(out)
         self._hidden = []
         for i in hid:
             self._hidden.append(Layer(i))
 
     def out(self):
-        None
+        pass
 
     def train(self):
-        None
+        pass
 '''
 To do:
-- input -> output
 - training
 - genetic algorithm
 '''
