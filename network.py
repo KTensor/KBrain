@@ -7,39 +7,48 @@ def sigmoid(x, deriv = False):
         return 1/(1+np.exp(-x))
 
 
-class Neuron:
-    def __init__(self, aWeights):
-        '''weights should be a (L+1) vector'''
-        self._weights = aWeights
-
-    def out(self, aInput):
-        '''input should be a (L+1) vector, should have a -1 as last value for threshold weight'''
-        return sigmoid(np.dot(aInput, self._weights))
+# class Neuron:
+#     def __init__(self, aWeights):
+#         '''weights should be a (L+1) vector'''
+#         self._weights = aWeights
+#
+#     def out(self, aInput):
+#         '''input should be a weightLength vector, should have a -1 as last value for threshold weight'''
+#         return sigmoid(np.dot(aInput, self._weights))
 
 
 class Layer:
     def __init__(self, numNeurons = 1):
-        self._neurons = []
+        self._neurons = np.matrix([])
         self._neurLength = numNeurons
+        self._weightLength = None
         self._nextLayer = None
         self._prevLayer = None
 
     def connect(self, layer):
         '''A -> B : B.connect(A)'''
-        self._neurons = []
-        weightLength = layer._neurLength + 1
-        for i in range(0, self._neurLength):
-            self._neurons.append(Neuron(2*np.random.random(weightLength) - 1))
+        self._weightLength = layer._neurLength + 1
+        # self._neurons = []
+        # for i in range(0, self._neurLength):
+        #     self._neurons.append(Neuron(2*np.random.random(weightLength) - 1))
         layer._nextLayer = self
         self._prevLayer = layer
 
+    def setNeurons(self, neurarray):
+        '''neuron array should be a 2D matrix, rows are neurons, columns are weights, dim is neurLengthxweightLength'''
+        self._neurons = neurarray.T
+
+    def getNeurons(self):
+        return self._neurons.T
+
     def out(self, aInput):
-        '''input should be a (L) vector'''
+        '''input should be a (weightLength - 1) vector'''
         inp = aInput.append(-1)
-        arr = np.array([])
-        for(neuron in self._neurons):
-            arr.append(neuron.out(inp))
-        return arr
+        # arr = np.array([])
+        # for(neuron in self._neurons):
+        #     arr.append(neuron.out(inp))
+        # return arr
+        return inp.dot(self._neurons)
 
 
 class Input(Layer):
@@ -51,7 +60,7 @@ class Input(Layer):
 
 
 class Network:
-    def __init__(self, inp, hid, out):
+    def __init__(self, inp, hid, out, layerWeights = None):
         self._input = Input(inp)
         self._output = Layer(out)
         self._layers = []
@@ -62,6 +71,10 @@ class Network:
 
         for i in range(1, self._layers.size):
             self._layers[i].connect(self._layers[i-1])
+            if layerWeights is None:
+                self._layers[i].setNeurons(np.random.rand(self._layers[i]._neurLength, self._layers[i]._weightLength) * 2 - 1)
+            else:
+                self._layers[i].setNeurons(layerWeights[i-1])
 
     def out(self, aInput):
         arr = aInput
@@ -73,6 +86,6 @@ class Network:
         pass
 '''
 To do:
-- training
+- training, backpropagation
 - genetic algorithm
 '''
