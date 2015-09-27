@@ -1,4 +1,5 @@
-import numpy as np;
+import numpy as np
+import random as random
 
 def sigmoid(x, deriv = False):
     if deriv == True:
@@ -6,6 +7,8 @@ def sigmoid(x, deriv = False):
     else:
         return 1/(1+np.exp(-x))
 
+def lninv(x):
+    return 1/(np.log(x+2))
 
 class Layer:
     def __init__(self, numNeurons = 1):
@@ -81,11 +84,13 @@ class Network:
             history.append(np.append(arr, -1))
         return history
 
-    def train(self, example):
+    def train(self, example, rate):
         '''example is a tuple x, y; both arrays input and output'''
         x, y = example
 
         history = self.trainOut(x)
+
+        deltas = []
 
         prediction = history[-1]
         actual = y
@@ -93,8 +98,38 @@ class Network:
         error = (prediction - actual)
         slope = [sigmoid(i, True) for i in prediction]
         deltaOut = np.multiply(error, slope)
+        deltas.insert(0, deltaOut)
 
-        #need to calculate delta value for each hidden layer
+        for i in reversed(range(0, len(history)-1)):
+            delta = np.array([])
+            for j in range(0, len(self._layers[i].getNeurons())):
+                kNeuron = self._layers[i+1].getNeurons()
+                s = 0
+                for k in range(0, len(self._layers[i+1].getNeurons())):
+                    s += kNeuron[k][j]*deltas[0][k]
+                delta = np.append(delta, sigmoid(history[i][j], True) * s)
+            deltas.insert(0, delta)
+
+        deltas.reverse()
+        del history[-1]
+        history.insert(0, np.append(x, -1))
+
+        for delta, output, layer in zip(deltas, history, self._layers):
+            deltaWeights = np.matrix(delta).T.dot(np.matrix(output)) * rate * -1
+            layer.setNeurons(layer.getNeurons() + deltaWeights)
+
+        return (np.rint(prediction) == actual).all()
+
+    def trainingSchedule(self, trainingSet, iterations, rate = 1, printRate = 512):
+        '''set is list of tuples x, y'''
+        l = len(trainingSet)
+        numC = 0
+        for i in range(0, iterations):
+            correct = self.train(trainingSet[random.randrange(0, l)], rate * lninv(i))
+            if(correct):
+                numC += 1
+            if(i % printRate == 0):
+                print('iteration: {0} accuracy: {1}'.format(str(i), str(numC/(i+1))))
 
     def __str__(self):
         x = 'row is neuron\nlast element of neuron is threshold\n\n'
