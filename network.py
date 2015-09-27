@@ -105,7 +105,9 @@ class Network:
             for j in range(0, len(self._layers[i].getNeurons())):
                 kNeuron = self._layers[i+1].getNeurons()
                 s = 0
-                for k in range(0, len(self._layers[i+1].getNeurons())):
+                for k in range(0, len(kNeuron)):
+                    print('kNeuron ' + str(kNeuron[k][j]))
+                    print('delta ' + str(deltas[0][k]))
                     s += kNeuron[k][j]*deltas[0][k]
                 delta = np.append(delta, sigmoid(history[i][j], True) * s)
             deltas.insert(0, delta)
