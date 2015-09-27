@@ -1,7 +1,7 @@
 import numpy as np;
 
 def sigmoid(x, deriv = False):
-    if(deriv == True):
+    if deriv == True:
         return x*(1-x)
     else:
         return 1/(1+np.exp(-x))
@@ -43,12 +43,18 @@ class Layer:
 
     def out(self, aInput):
         '''input should be a (weightLength - 1) vector'''
-        inp = aInput.append(-1)
+        inp = np.append(aInput, -1)
         # arr = np.array([])
         # for(neuron in self._neurons):
         #     arr.append(neuron.out(inp))
         # return arr
-        return inp.dot(self._neurons)
+        val = np.ravel(inp.dot(self._neurons))
+        for i in range(0, val.size):
+            val[i] = sigmoid(val[i])
+        return val
+
+    def __str__(self):
+        return str(self.getNeurons())
 
 
 class Input(Layer):
@@ -69,12 +75,14 @@ class Network:
             self._layers.append(Layer(i))
         self._layers.append(self._output)
 
-        for i in range(1, self._layers.size):
+        for i in range(1, len(self._layers)):
             self._layers[i].connect(self._layers[i-1])
             if layerWeights is None:
                 self._layers[i].setNeurons(np.random.rand(self._layers[i]._neurLength, self._layers[i]._weightLength) * 2 - 1)
             else:
                 self._layers[i].setNeurons(layerWeights[i-1])
+
+        del self._layers[0]
 
     def out(self, aInput):
         arr = aInput
@@ -84,6 +92,14 @@ class Network:
 
     def train(self):
         pass
+
+    def __str__(self):
+        x = 'row is neuron\nlast element of neuron is threshold\n\n'
+        x += 'input\n {0}\n\n'.format(str(self._input._neurLength))
+        for layer in self._layers:
+            x += 'layer\n {0}\n\n'.format(str(layer))
+        return x
+
 '''
 To do:
 - training, backpropagation
