@@ -7,16 +7,6 @@ def sigmoid(x, deriv = False):
         return 1/(1+np.exp(-x))
 
 
-# class Neuron:
-#     def __init__(self, aWeights):
-#         '''weights should be a (L+1) vector'''
-#         self._weights = aWeights
-#
-#     def out(self, aInput):
-#         '''input should be a weightLength vector, should have a -1 as last value for threshold weight'''
-#         return sigmoid(np.dot(aInput, self._weights))
-
-
 class Layer:
     def __init__(self, numNeurons = 1):
         self._neurons = np.matrix([])
@@ -28,9 +18,6 @@ class Layer:
     def connect(self, layer):
         '''A -> B : B.connect(A)'''
         self._weightLength = layer._neurLength + 1
-        # self._neurons = []
-        # for i in range(0, self._neurLength):
-        #     self._neurons.append(Neuron(2*np.random.random(weightLength) - 1))
         layer._nextLayer = self
         self._prevLayer = layer
 
@@ -44,10 +31,6 @@ class Layer:
     def out(self, aInput):
         '''input should be a (weightLength - 1) vector'''
         inp = np.append(aInput, -1)
-        # arr = np.array([])
-        # for(neuron in self._neurons):
-        #     arr.append(neuron.out(inp))
-        # return arr
         val = np.ravel(inp.dot(self._neurons))
         for i in range(0, val.size):
             val[i] = sigmoid(val[i])
