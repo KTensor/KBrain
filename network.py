@@ -73,8 +73,28 @@ class Network:
             arr = layer.out(arr)
         return arr
 
-    def train(self):
-        pass
+    def trainOut(self, aInput):
+        arr = aInput
+        history = []
+        for layer in self._layers:
+            arr = layer.out(arr)
+            history.append(np.append(arr, -1))
+        return history
+
+    def train(self, example):
+        '''example is a tuple x, y; both arrays input and output'''
+        x, y = example
+
+        history = self.trainOut(x)
+
+        prediction = history[-1]
+        actual = y
+
+        error = (prediction - actual)
+        slope = [sigmoid(i, True) for i in prediction]
+        deltaOut = np.multiply(error, slope)
+
+        #need to calculate delta value for each hidden layer
 
     def __str__(self):
         x = 'row is neuron\nlast element of neuron is threshold\n\n'
