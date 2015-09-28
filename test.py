@@ -10,4 +10,4 @@ net = N.Network(2, [2], 1)
 
 trainingSet = [(np.array([0, 0]), np.array([0])), (np.array([0, 1]), np.array([1])), (np.array([1, 0]), np.array([1])), (np.array([1, 1]), np.array([0]))]
 
-net.trainingSchedule(trainingSet, 4096)
+net.trainingSchedule(trainingSet, 131072)
