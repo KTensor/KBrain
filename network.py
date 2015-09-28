@@ -1,6 +1,9 @@
 import numpy as np
 import random as random
 
+#KEVIN WANG
+#github:xorkevin
+
 def sigmoid(x, deriv = False):
     if deriv == True:
         return x*(1-x)
@@ -136,7 +139,7 @@ class Network:
 
         return (np.rint(prediction) == actual).all()
 
-    def trainingSchedule(self, trainingSet, iterations, rate = 1, printRate = 512):
+    def trainingSchedule(self, trainingSet, iterations, rate = 1, printRate = 4096):
         '''set is list of tuples x, y'''
         l = len(trainingSet)
         numC = 0
@@ -148,7 +151,7 @@ class Network:
                 print('iteration: {0} accuracy: {1}'.format(str(i+1), str(numC/(i+1))))
 
     def __str__(self):
-        x = 'row is neuron\nlast element of neuron is threshold\n\n'
+        x = 'NETWORK\nrow is neuron\nlast element of neuron is threshold\n\n'
         x += 'input\n {0}\n\n'.format(str(self._input._neurLength))
         for layer in self._layers:
             x += 'layer\n {0}\n\n'.format(str(layer))
