@@ -1,9 +1,9 @@
 import numpy as np
-import network as N
+import ffnet as F
 
 np.random.seed(0)
 
-net = N.Network(2, [2], 1)
+net = F.Network(2, [2], 1)
 
 print(str(net))
 

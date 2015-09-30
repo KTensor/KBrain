@@ -1,3 +1,4 @@
-# Neural Net Test 
+# KBrain  
 
-Testing some neural networks 
+a neural network library 
+

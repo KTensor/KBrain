@@ -151,7 +151,7 @@ class Network:
                 print('iteration: {0} accuracy: {1}'.format(str(i+1), str(numC/(i+1))))
 
     def __str__(self):
-        x = 'NETWORK\nrow is neuron\nlast element of neuron is threshold\n\n'
+        x = 'FEED FORWARD NETWORK\nrow is neuron\nlast element of neuron is threshold\n\n'
         x += 'input\n {0}\n\n'.format(str(self._input._neurLength))
         for layer in self._layers:
             x += 'layer\n {0}\n\n'.format(str(layer))
