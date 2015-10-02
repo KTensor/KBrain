@@ -89,52 +89,33 @@ class Network:
 
     def train(self, example, rate):
         '''example is a tuple x, y; both arrays input and output'''
-        # print('self ' + str(self))
         x, y = example
 
         history = self.trainOut(x)
-        # print('history ' + str(history))
 
         deltas = []
 
         prediction = np.delete(history[-1], -1)
         actual = y
-        # print('prediction ' + str(prediction))
-        # print('actual ' + str(actual))
         error = (prediction - actual)
         slope = [sigmoid(i, True) for i in prediction]
-        # print('error ' + str(error))
-        # print('slope ' + str(slope))
         deltaOut = np.multiply(error, slope)
         deltas.insert(0, deltaOut)
-        # print('deltaOut ' + str(deltaOut))
 
-        # print(str(list(range(len(history)-2, -1, -1))))
         for i in range(len(history)-2, -1, -1):
             delta = np.array([])
-            # print('i ' + str(i))
             kNeuron = self._layers[i+1].getNeurons()
-            # print('layer ' + str(kNeuron))
             for j in range(0, len(self._layers[i].getNeurons())):
                 s = 0
                 for k in range(0, len(kNeuron)):
-                    # print('kNeuron1' + str(kNeuron[k]))
-                    # print('kNeuron ' + str(np.ravel(kNeuron[k])[j]))
-                    # print('delta ' + str(deltas[0][k]))
                     s += np.ravel(kNeuron[k])[j]*deltas[0][k]
                 delta = np.append(delta, sigmoid(history[i][j], True) * s)
             deltas.insert(0, delta)
-        # print('deltasBefore ' + str(deltas))
-        # deltas.reverse()
-        # print('deltas ' + str(deltas))
         del history[-1]
         history.insert(0, np.append(x, -1))
 
         for delta, output, layer in zip(deltas, history, self._layers):
-            # print('delta ' + str(delta))
-            # print('output ' + str(output))
             deltaWeights = np.matrix(delta).T.dot(np.matrix(output)) * rate * -1
-            # print('deltaWeights ' + str(deltaWeights))
             layer.setNeurons(layer.getNeurons() + deltaWeights)
 
         return (np.rint(prediction) == actual).all()
@@ -159,6 +140,6 @@ class Network:
 
 '''
 To do:
-- training, backpropagation
+- save and read to file
 - genetic algorithm
 '''
