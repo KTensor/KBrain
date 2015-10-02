@@ -140,6 +140,7 @@ class Network:
 
 '''
 To do:
+- step accuracy 
 - steepen sigmoid function
 - save and read to file
 - genetic algorithm
