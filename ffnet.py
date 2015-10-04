@@ -12,6 +12,7 @@ def sigmoid(x, deriv = False):
 
 def lninv(x):
     return 1/(np.log(x+2))
+    
 
 class Layer:
     def __init__(self, numNeurons = 1):
@@ -128,7 +129,7 @@ class Network:
         numC = 0
         count = 0
         accuracy = 0
-        while accuracy < targetAccuracy or count < 2048 or totalCount < 16384:
+        while accuracy < targetAccuracy or count < 2048 or totalCount < 4096:
             correct = self.train(trainingSet[random.randrange(0, l)], rate * lninv(totalCount))
             totalCount += 1
             count += 1
