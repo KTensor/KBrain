@@ -6,9 +6,9 @@ import random as random
 
 def sigmoid(x, deriv = False):
     if deriv == True:
-        return x*(1-x)
+        return 4*x*(1-x)
     else:
-        return 1/(1+np.exp(-x))
+        return 1/(1+np.exp(-4*x))
 
 def lninv(x):
     return 1/(np.log(x+2))
@@ -120,16 +120,27 @@ class Network:
 
         return (np.rint(prediction) == actual).all()
 
-    def trainingSchedule(self, trainingSet, iterations, rate = 1, printRate = 4096):
+    def trainingSchedule(self, trainingSet, targetAccuracy = 0.996, rate = 1, printRate = 4096):
         '''set is list of tuples x, y'''
+        print('begin training')
         l = len(trainingSet)
+        totalCount = 0
         numC = 0
-        for i in range(0, iterations):
-            correct = self.train(trainingSet[random.randrange(0, l)], rate * lninv(i))
-            if(correct):
+        count = 0
+        accuracy = 0
+        while accuracy < targetAccuracy or count < 2048 or totalCount < 16384:
+            correct = self.train(trainingSet[random.randrange(0, l)], rate * lninv(totalCount))
+            totalCount += 1
+            count += 1
+            if correct:
                 numC += 1
-            if (i+1) % printRate == 0:
-                print('iteration: {0} accuracy: {1}'.format(str(i+1), str(numC/(i+1))))
+            accuracy = numC/count
+            if totalCount % printRate == 0:
+                print('iteration: {0} accuracy: {1}'.format(str(totalCount), str(accuracy)))
+                numC = 0
+                count = 0
+        print('iteration: {0} accuracy: {1}\n finished training\n\n'.format(str(totalCount), str(accuracy)))
+
 
     def __str__(self):
         x = 'FEED FORWARD NETWORK\nrow is neuron\nlast element of neuron is threshold\n\n'
@@ -140,8 +151,6 @@ class Network:
 
 '''
 To do:
-- step accuracy 
-- steepen sigmoid function
 - save and read to file
 - genetic algorithm
 '''
