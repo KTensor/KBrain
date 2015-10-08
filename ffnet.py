@@ -238,6 +238,6 @@ class Network:
 
 '''
 To do:
-- add softmax for mutually exclusive
+- use theano
 - genetic algorithm
 '''
