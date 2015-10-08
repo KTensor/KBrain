@@ -4,6 +4,19 @@ import numpy as np
 #Kevin Wang
 #github:xorkevin
 
+key = [
+    np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+    np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 0]),
+    np.array([0, 0, 1, 0, 0, 0, 0, 0, 0, 0]),
+    np.array([0, 0, 0, 1, 0, 0, 0, 0, 0, 0]),
+    np.array([0, 0, 0, 0, 1, 0, 0, 0, 0, 0]),
+    np.array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0]),
+    np.array([0, 0, 0, 0, 0, 0, 1, 0, 0, 0]),
+    np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0]),
+    np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 0]),
+    np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    ]
+
 def mnist(dataset=0, path='.', digits=np.arange(10)):
     fname_img = None
     fname_label = None
@@ -30,9 +43,9 @@ def mnist(dataset=0, path='.', digits=np.arange(10)):
     N = len(ind)
 
     images = np.zeros((N, rows*cols), dtype=np.uint8)
-    labels = np.zeros((N, 1), dtype=np.int8)
+    labels = np.zeros((N, 10), dtype=np.int8)
     for i in range(len(ind)):
         images[i] = np.ravel(np.array(img[ ind[i]*rows*cols : (ind[i]+1)*rows*cols ]).reshape((rows, cols)))
-        labels[i] = label[ind[i]]
+        labels[i] = key[label[ind[i]]]
 
     return list(zip(images, labels))

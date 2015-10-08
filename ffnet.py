@@ -8,9 +8,28 @@ import random as random
 
 def sigmoid(x, deriv = False):
     if deriv == True:
+        return 1 - x*x
+    else:
+        return np.tanh(x)
+
+def sig(x, deriv = False):
+    if deriv == True:
+        if x > 2:
+            return 0.001359
+        elif x < -2:
+            return 0.001359
         return 4*x*(1-x)
     else:
+        if x > 2:
+            return 1
+        elif x < -2:
+            return 0
         return 1/(1+np.exp(-4*x))
+
+def softmax(w):
+    e = np.exp(w - np.amax(w))
+    dist = e / np.sum(e)
+    return dist
 
 def lninv(x):
     y = 1/(np.log(x+2))
@@ -49,7 +68,16 @@ class Layer:
         return val
 
     def __str__(self):
-        return str(self.getNeurons()).strip().replace('\n', '').replace('[ ', '[').replace('  ', ' ').replace(' ', ',').replace(',,', ',')
+        x = '['
+        n = self.getNeurons()
+        r,c = n.shape
+        for i in range(0, r):
+            x += '['
+            for j in range(0, c):
+                x += str(n[i, j])+','
+            x += '],'
+        x += ']'
+        return x
 
 
 class Input(Layer):
@@ -59,12 +87,27 @@ class Input(Layer):
     def out(self, aInput):
         return aInput
 
+class Output(Layer):
+    def out(self, aInput):
+            inp = np.append(aInput, -1)
+            val = np.ravel(inp.dot(self._neurons))
+            for i in range(0, val.size):
+                val[i] = sig(val[i])
+            return val
+
+class MutOutput(Layer):
+    def out(self, aInput):
+        inp = np.append(aInput, -1)
+        return softmax(np.ravel(inp.dot(self._neurons)))
 
 class Network:
-    def __init__(self, inp=None, hid=None, out=None, layerWeights = None):
+    def __init__(self, inp=None, hid=None, out=None, layerWeights = None, exclusive = False):
         if inp is not None:
             self._input = Input(inp)
-            self._output = Layer(out)
+            self._output = Output(out)
+            self._exclusive = exclusive
+            if self._exclusive:
+                self._output = MutOutput(out)
             self._layers = []
             self._layers.append(self._input)
             for i in hid:
@@ -88,7 +131,7 @@ class Network:
 
     def load(self, filename):
         f = open(filename, 'r')
-
+        self._exclusive = f.readline().strip()=='True'
         self._input = Input(int(f.readline().strip()))
 
         self._layers = []
@@ -98,7 +141,10 @@ class Network:
         for i in hid:
             self._layers.append(Layer(i))
 
-        self._output = Layer(int(f.readline().strip()))
+        z = int(f.readline().strip())
+        self._output = Output(z)
+        if self._exclusive:
+            self._output = MutOutput(z)
         self._layers.append(self._output)
 
         for i in range(1, len(self._layers)):
@@ -133,8 +179,10 @@ class Network:
         prediction = np.delete(history[-1], -1)
         actual = y
         error = (prediction - actual)
-        slope = [sigmoid(i, True) for i in prediction]
+        slope = [sig(i, True) for i in prediction]
         deltaOut = np.multiply(error, slope)
+        if self._exclusive:
+            deltaOut = error
         deltas.insert(0, deltaOut)
 
         for i in range(len(history)-2, -1, -1):
@@ -155,7 +203,7 @@ class Network:
 
         return (np.rint(prediction) == actual).all()
 
-    def trainingSchedule(self, trainingSet, targetAccuracy = 0.996, rate = 1, printRate = 4096):
+    def trainingSchedule(self, trainingSet, targetAccuracy = 0.996, rate = 1/512, printRate = 4096):
         '''set is list of tuples x, y'''
         print('begin training')
         l = len(trainingSet)
@@ -164,7 +212,7 @@ class Network:
         count = 0
         accuracy = 0
         while accuracy < targetAccuracy or count < 2048 or totalCount < 4096:
-            correct = self.train(trainingSet[random.randrange(0, l)], rate * lninv(totalCount))
+            correct = self.train(trainingSet[random.randrange(0, l)], rate)
             totalCount += 1
             count += 1
             if correct:
@@ -179,8 +227,8 @@ class Network:
 
 
     def __str__(self):
-        # x = 'FEED FORWARD NETWORK\nrow is neuron\nlast element of neuron is threshold\n\n'
-        x='{0}\n'.format(str(self._input._neurLength))
+        x = '{0}\n'.format(str(self._exclusive))
+        x += '{0}\n'.format(str(self._input._neurLength))
         for i in range(len(self._layers)-1):
             x += '{0} '.format(str(self._layers[i]._neurLength))
         x+='\n{0}\n'.format(str(self._layers[len(self._layers)-1]._neurLength))
@@ -190,6 +238,6 @@ class Network:
 
 '''
 To do:
-- save and read to file
+- add softmax for mutually exclusive
 - genetic algorithm
 '''

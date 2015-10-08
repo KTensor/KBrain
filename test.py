@@ -5,17 +5,18 @@ import ffnet as F
 #github:xorkevin
 
 class Tester:
-    def __init__(self, filename, dim, targetAccuracy, trainingSet, testingSet):
+    def __init__(self, filename, dim, exclusive, targetAccuracy, trainingSet, testingSet):
         self._filename = filename
         self._mode = 2
         self._dimensions = dim
+        self._exclusive = exclusive
         self._training = trainingSet
         self._testing = testingSet
         self._targetAccuracy = targetAccuracy
 
     def start(self):
         while self._mode != 0:
-            self._mode = int(input('1 | train \n2 | test \n3 | test (printing) \n7 | change target accuracy \n9 | change filename \n0 | quit \n$: '))
+            self._mode = int(input('1 | train \n2 | test \n3 | test (printing) \n7 | change target accuracy \n8 | restart training *DANGER* \n9 | change filename \n0 | quit \n$: '))
             if self._mode == 1:
                 self.train()
             elif self._mode == 2:
@@ -24,16 +25,22 @@ class Tester:
                 self.test(True)
             elif self._mode == 7:
                 self._targetAccuracy = float(int(input('enter new accuracy')))
+            elif self._mode == 8:
+                self.train(True)
             elif self._mode == 9:
                 self._filename = input('enter new filename: ')
 
-    def train(self):
+    def train(self, restart = False):
         print('TRAINING\n')
 
         i, hid, o = self._dimensions
-        net = F.Network(i, hid, o)
-        net.trainingSchedule(self._training, self._targetAccuracy)
-        net.save(self._filename)
+        network = F.Network()
+        if restart:
+            network = F.Network(i, hid, o, None, self._exclusive)
+        else:
+            network.load(self._filename)
+        network.trainingSchedule(self._training, self._targetAccuracy)
+        network.save(self._filename)
 
         print('file saved to {0}\n\n'.format(self._filename))
 
@@ -42,6 +49,8 @@ class Tester:
 
         net = F.Network()
         net.load(self._filename)
+
+        print(net)
 
         total = 0
         numcorrect = 0
