@@ -1,4 +1,6 @@
 import numpy as np
+from ast import literal_eval as ast_literal_eval
+import sys
 import random as random
 
 #KEVIN WANG
@@ -12,7 +14,7 @@ def sigmoid(x, deriv = False):
 
 def lninv(x):
     return 1/(np.log(x+2))
-    
+
 
 class Layer:
     def __init__(self, numNeurons = 1):
@@ -44,7 +46,7 @@ class Layer:
         return val
 
     def __str__(self):
-        return str(self.getNeurons())
+        return str(self.getNeurons()).strip().replace('\n', '').replace('[ ', '[').replace('  ', ' ').replace(' ', ',').replace(',,', ',')
 
 
 class Input(Layer):
@@ -56,23 +58,52 @@ class Input(Layer):
 
 
 class Network:
-    def __init__(self, inp, hid, out, layerWeights = None):
-        self._input = Input(inp)
-        self._output = Layer(out)
+    def __init__(self, inp=None, hid=None, out=None, layerWeights = None):
+        if inp is not None:
+            self._input = Input(inp)
+            self._output = Layer(out)
+            self._layers = []
+            self._layers.append(self._input)
+            for i in hid:
+                self._layers.append(Layer(i))
+            self._layers.append(self._output)
+
+            for i in range(1, len(self._layers)):
+                self._layers[i].connect(self._layers[i-1])
+                if layerWeights is None:
+                    self._layers[i].setNeurons(np.random.rand(self._layers[i]._neurLength, self._layers[i]._weightLength) * 2 - 1)
+                else:
+                    self._layers[i].setNeurons(layerWeights[i-1])
+
+            del self._layers[0]
+
+    def save(self, filename):
+        f = open(filename, 'r+')
+        f.truncate()
+        f.write(self.__str__())
+        f.close()
+
+    def load(self, filename):
+        f = open(filename, 'r')
+
+        self._input = Input(int(f.readline().strip()))
+
         self._layers = []
         self._layers.append(self._input)
+
+        hid = map(int, f.readline().strip().split(' '))
         for i in hid:
             self._layers.append(Layer(i))
+
+        self._output = Layer(int(f.readline().strip()))
         self._layers.append(self._output)
 
         for i in range(1, len(self._layers)):
             self._layers[i].connect(self._layers[i-1])
-            if layerWeights is None:
-                self._layers[i].setNeurons(np.random.rand(self._layers[i]._neurLength, self._layers[i]._weightLength) * 2 - 1)
-            else:
-                self._layers[i].setNeurons(layerWeights[i-1])
+            self._layers[i].setNeurons(np.matrix(ast_literal_eval(f.readline().strip())))
 
         del self._layers[0]
+        f.close()
 
     def out(self, aInput):
         arr = aInput
@@ -138,16 +169,20 @@ class Network:
             accuracy = numC/count
             if totalCount % printRate == 0:
                 print('iteration: {0} accuracy: {1}'.format(str(totalCount), str(accuracy)))
+                sys.stdout.flush()
                 numC = 0
                 count = 0
         print('iteration: {0} accuracy: {1}\n finished training\n\n'.format(str(totalCount), str(accuracy)))
 
 
     def __str__(self):
-        x = 'FEED FORWARD NETWORK\nrow is neuron\nlast element of neuron is threshold\n\n'
-        x += 'input\n {0}\n\n'.format(str(self._input._neurLength))
+        # x = 'FEED FORWARD NETWORK\nrow is neuron\nlast element of neuron is threshold\n\n'
+        x='{0}\n'.format(str(self._input._neurLength))
+        for i in range(len(self._layers)-1):
+            x += '{0} '.format(str(self._layers[i]._neurLength))
+        x+='\n{0}\n'.format(str(self._layers[len(self._layers)-1]._neurLength))
         for layer in self._layers:
-            x += 'layer\n {0}\n\n'.format(str(layer))
+            x += '{0}\n'.format(str(layer))
         return x
 
 '''

@@ -1,26 +1,59 @@
 import numpy as np
 import ffnet as F
 
-np.random.seed(0)
+#Kevin Wang
+#github:xorkevin
 
-net = F.Network(2, [2], 1)
+class Tester:
+    def __init__(self, filename, dim, targetAccuracy, trainingSet, testingSet):
+        self._filename = filename
+        self._mode = 2
+        self._dimensions = dim
+        self._training = trainingSet
+        self._testing = testingSet
+        self._targetAccuracy = targetAccuracy
 
-print(str(net))
+    def start(self):
+        while self._mode != 0:
+            self._mode = int(input('1 | train \n2 | test \n3 | test (printing) \n7 | change target accuracy \n9 | change filename \n0 | quit \n$: '))
+            if self._mode == 1:
+                self.train()
+            elif self._mode == 2:
+                self.test()
+            elif self._mode == 3:
+                self.test(True)
+            elif self._mode == 7:
+                self._targetAccuracy = float(int(input('enter new accuracy')))
+            elif self._mode == 9:
+                self._filename = input('enter new filename: ')
 
+    def train(self):
+        print('TRAINING\n')
 
-trainingSet = [(np.array([0, 0]), np.array([0])), (np.array([0, 1]), np.array([1])), (np.array([1, 0]), np.array([1])), (np.array([1, 1]), np.array([0]))]
+        i, hid, o = self._dimensions
+        net = F.Network(i, hid, o)
+        net.trainingSchedule(self._training, self._targetAccuracy)
+        net.save(self._filename)
 
-print('input: {0}; output: {1}'.format('[0, 0]', str(net.out(np.array([0, 0])))))
-print('input: {0}; output: {1}'.format('[0, 1]', str(net.out(np.array([0, 1])))))
-print('input: {0}; output: {1}'.format('[1, 0]', str(net.out(np.array([1, 0])))))
-print('input: {0}; output: {1}'.format('[1, 1]', str(net.out(np.array([1, 1])))))
+        print('file saved to {0}\n\n'.format(self._filename))
 
+    def test(self, printing = False):
+        print('TESTING\n')
 
-net.trainingSchedule(trainingSet)
+        net = F.Network()
+        net.load(self._filename)
 
-print(str(net))
+        total = 0
+        numcorrect = 0
 
-print('input: {0}; output: {1}'.format('[0, 0]', str(net.out(np.array([0, 0])))))
-print('input: {0}; output: {1}'.format('[0, 1]', str(net.out(np.array([0, 1])))))
-print('input: {0}; output: {1}'.format('[1, 0]', str(net.out(np.array([1, 0])))))
-print('input: {0}; output: {1}'.format('[1, 1]', str(net.out(np.array([1, 1])))))
+        for test, actual in self._testing:
+            prediction = net.out(test)
+            correct = (np.rint(prediction) == actual).all()
+            if correct:
+                numcorrect+=1
+            total += 1
+            if printing:
+                print('input: {0} | output: {1} | correct: {2}'.format(str(test), str(net.out(test)), str(correct)))
+
+        accuracy = numcorrect/total
+        print('total tests: {0} | num correct: {1} | accuracy: {2}\n\n'.format(str(total), str(numcorrect), str(accuracy)))
