@@ -13,7 +13,10 @@ def sigmoid(x, deriv = False):
         return 1/(1+np.exp(-4*x))
 
 def lninv(x):
-    return 1/(np.log(x+2))
+    y = 1/(np.log(x+2))
+    if y < 0.0056:
+        y = 0.0056
+    return y
 
 
 class Layer:

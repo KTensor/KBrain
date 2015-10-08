@@ -6,7 +6,7 @@ import sys
 #Kevin Wang
 #github:xorkevin
 
-dim = (784, [28], 10)
+dim = (784, [28, 10], 1)
 trainingSet = m.mnist(0, './database/mnist')
 testingSet = m.mnist(1, './database/mnist')
 

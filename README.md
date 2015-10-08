@@ -1,4 +1,5 @@
 # KBrain  
 
-a neural network library 
+#### Kevin Wang
 
+a neural network library
