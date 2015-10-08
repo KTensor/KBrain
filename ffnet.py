@@ -8,9 +8,9 @@ import random as random
 
 def sigmoid(x, deriv = False):
     if deriv == True:
-        return 1 - x*x
+        return (1 - x*x)*1.2
     else:
-        return np.tanh(x)
+        return 1.2*np.tanh(x)
 
 def sig(x, deriv = False):
     if deriv == True:
@@ -238,6 +238,7 @@ class Network:
 
 '''
 To do:
+- convolutional net
 - use theano
 - genetic algorithm
 '''
