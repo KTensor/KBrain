@@ -50,7 +50,7 @@ class Tester:
         net = F.Network()
         net.load(self._filename)
 
-        print(net)
+        # print(net)
 
         total = 0
         numcorrect = 0
