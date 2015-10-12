@@ -61,3 +61,12 @@ class ConvLayer(F.Layer):
 class ConvInput(ConvLayer):
     def out(self, inp):
         return inp
+
+class ConvNetwork(F.Network):
+    def __init__(self, conv=None, inp=None, hid=None, out=None, layerWeights=None, exclusive=None):
+        if conv is not None:
+            super().initialize(inp, hid, out, layerWeights, exclusive)
+            self.initialize(conv)
+
+    def initialize(self, conv):
+        pass

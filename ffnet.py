@@ -2,6 +2,7 @@ import numpy as np
 from ast import literal_eval as ast_literal_eval
 import sys
 import random as random
+import io as io
 
 #KEVIN WANG
 #github:xorkevin
@@ -100,25 +101,28 @@ class MutOutput(Layer):
 class Network:
     def __init__(self, inp=None, hid=None, out=None, layerWeights = None, exclusive = False):
         if inp is not None:
-            self._input = Input(inp)
-            self._output = Output(out)
-            self._exclusive = exclusive
-            if self._exclusive:
-                self._output = MutOutput(out)
-            self._layers = []
-            self._layers.append(self._input)
-            for i in hid:
-                self._layers.append(Layer(i))
-            self._layers.append(self._output)
+            self.initialize(inp, hid, out, layerWeights, exclusive)
 
-            for i in range(1, len(self._layers)):
-                self._layers[i].connect(self._layers[i-1])
-                if layerWeights is None:
-                    self._layers[i].setNeurons(np.random.rand(self._layers[i]._neurLength, self._layers[i]._weightLength) * 2 - 1)
-                else:
-                    self._layers[i].setNeurons(layerWeights[i-1])
+    def initialize(self, inp, hid, out, layerWeights, exclusive):
+        self._input = Input(inp)
+        self._output = Output(out)
+        self._exclusive = exclusive
+        if self._exclusive:
+            self._output = MutOutput(out)
+        self._layers = []
+        self._layers.append(self._input)
+        for i in hid:
+            self._layers.append(Layer(i))
+        self._layers.append(self._output)
 
-            del self._layers[0]
+        for i in range(1, len(self._layers)):
+            self._layers[i].connect(self._layers[i-1])
+            if layerWeights is None:
+                self._layers[i].setNeurons(np.random.rand(self._layers[i]._neurLength, self._layers[i]._weightLength) * 2 - 1)
+            else:
+                self._layers[i].setNeurons(layerWeights[i-1])
+
+        del self._layers[0]
 
     def save(self, filename):
         f = open(filename, 'r+')
@@ -126,39 +130,30 @@ class Network:
         f.write(self.__str__())
         f.close()
 
-    def load(self, filename):
-        f = open(filename, 'r')
-        self._exclusive = f.readline().strip()=='True'
-        self._input = Input(int(f.readline().strip()))
-
-        self._layers = []
-        self._layers.append(self._input)
-
-        hid = map(int, f.readline().strip().split(' '))
-        for i in hid:
-            self._layers.append(Layer(i))
-
-        z = int(f.readline().strip())
-        self._output = Output(z)
-        if self._exclusive:
-            self._output = MutOutput(z)
-        self._layers.append(self._output)
-
-        for i in range(1, len(self._layers)):
-            self._layers[i].connect(self._layers[i-1])
-            self._layers[i].setNeurons(np.matrix(ast_literal_eval(f.readline().strip())))
-
-        del self._layers[0]
+    def load(self, filename = None, text = None):
+        f = None
+        if text is None:
+            f = open(filename, 'r')
+        else:
+            f = io.StringIO(text)
+        exclusive = f.readline().strip()=='True'
+        inp = int(f.readline().strip())
+        hid = list(map(int, f.readline().strip().split(' ')))
+        out = int(f.readline().strip())
+        weights = []
+        for i in range(0, len(hid)+1):
+            weights.append(np.matrix(ast_literal_eval(f.readline().strip())))
         f.close()
+        self.initialize(inp, hid, out, weights, exclusive)
 
     def out(self, aInput):
-        arr = aInput
+        arr = np.ravel(aInput)
         for layer in self._layers:
             arr = layer.out(arr)
         return arr
 
     def trainOut(self, aInput):
-        arr = aInput
+        arr = np.ravel(aInput)
         history = []
         for layer in self._layers:
             arr = layer.out(arr)
@@ -209,7 +204,7 @@ class Network:
         count = 0
         accuracy = 0
         while accuracy < targetAccuracy or count < 2048 or totalCount < 4096:
-            correct = self.train(trainingSet[random.randrange(0, l)], rate / 512)
+            correct = self.train(trainingSet[random.randrange(0, l)], rate / min(256+totalCount/2048, 512))
             totalCount += 1
             count += 1
             if correct:
