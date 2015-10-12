@@ -36,14 +36,14 @@ class ConvLayer(F.Layer):
             filters.append(np.ravel(f))
         return np.matrix(filters)
 
-    def out(self, input):
+    def out(self, inp):
         '''input should be a 3D array with shape inputDim'''
         output = np.zeros((self._filterLength, self._stride, self._stride))
         x, y, z = output.shape
         for i in range(0, x):
             for j in range(0, y):
                 for k in range(0, z):
-                    output[i, j, k] = np.sum(np.multiply(input[:, round(j*self._strideLength):round(j*self._strideLength+self._filterWidth), round(k*self._strideLength):round(k*self._strideLength+self._filterWidth)], self._filters[i]))
+                    output[i, j, k] = np.sum(np.multiply(inp[:, round(j*self._strideLength):round(j*self._strideLength+self._filterWidth), round(k*self._strideLength):round(k*self._strideLength+self._filterWidth)], self._filters[i]))
         return output
 
     def __str__(self):
@@ -59,4 +59,5 @@ class ConvLayer(F.Layer):
         return x
 
 class ConvInput(ConvLayer):
-    pass
+    def out(self, inp):
+        return inp
