@@ -81,9 +81,6 @@ class Layer:
 
 
 class Input(Layer):
-    def __init__(self, length):
-        super().__init__(length)
-
     def out(self, aInput):
         return aInput
 
@@ -203,7 +200,7 @@ class Network:
 
         return (np.rint(prediction) == actual).all()
 
-    def trainingSchedule(self, trainingSet, targetAccuracy = 0.996, rate = 1/512, printRate = 4096):
+    def trainingSchedule(self, trainingSet, targetAccuracy = 0.996, rate = 1, printRate = 4096):
         '''set is list of tuples x, y'''
         print('begin training')
         l = len(trainingSet)
@@ -212,7 +209,7 @@ class Network:
         count = 0
         accuracy = 0
         while accuracy < targetAccuracy or count < 2048 or totalCount < 4096:
-            correct = self.train(trainingSet[random.randrange(0, l)], rate)
+            correct = self.train(trainingSet[random.randrange(0, l)], rate / 512)
             totalCount += 1
             count += 1
             if correct:
