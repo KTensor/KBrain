@@ -60,13 +60,21 @@ class ConvLayer(F.Layer):
 
 class ConvInput(ConvLayer):
     def out(self, inp):
-        return inp
+        return np.resize(inp, (self._filterLength, self._stride, self._stride))
 
 class ConvNetwork(F.Network):
-    def __init__(self, conv=None, inp=None, hid=None, out=None, layerWeights=None, exclusive=None):
-        if conv is not None:
+    def __init__(self, convInp=None, conv=None, inp=None, hid=None, out=None, layerWeights=None, exclusive=None):
+        if convInp is not None:
             super().initialize(inp, hid, out, layerWeights, exclusive)
-            self.initialize(conv)
+            self.initializeConv(convInp, conv)
 
-    def initialize(self, conv):
-        pass
+    def initializeConv(self, convInp, conv):
+        '''convInp is a 2tuple depth and max(dim x, dim y)'''
+        self._convInput = ConvInput(convInp[0], convInp[1])
+        self._convLayers = []
+        for i, j in conv:
+            self._convLayers.append(ConvLayer(i, j))
+        self._convLayers[0].connect(self._convInput)
+        for i in range(1, len(self._convLayers)):
+            self._convLayers[i].connect(self._convLayers[i-1])
+            #self._convLayers[i].setNeurons()
