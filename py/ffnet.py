@@ -211,8 +211,7 @@ class Network:
                 numC += 1
             accuracy = numC/count
             if totalCount % printRate == 0:
-                print('iteration: {0} accuracy: {1}'.format(str(totalCount), str(accuracy)))
-                sys.stdout.flush()
+                print('iteration: {0} accuracy: {1}'.format(str(totalCount), str(accuracy)), flush=True)
                 numC = 0
                 count = 0
         print('iteration: {0} accuracy: {1}\n finished training\n\n'.format(str(totalCount), str(accuracy)))
